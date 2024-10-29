@@ -1,0 +1,35 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 读取文件并解析数据
+def read_results(filename):
+    # 使用 pandas 读取分号分隔的数据
+    df = pd.read_csv(filename, sep=';', header=None, names=['老师', '组号', '成绩'])
+    return df
+
+# 绘制成绩分布图
+def plot_distributions(df):
+    # 以老师为分组绘制成绩分布
+    teacher_group = df.groupby(['老师', '成绩']).size().unstack().fillna(0)
+    teacher_group.plot(kind='bar', stacked=True, figsize=(10, 7))
+    plt.title('不同老师的成绩分布')
+    plt.xlabel('老师')
+    plt.ylabel('学生数量')
+    plt.show()
+
+    # 以组号为分组绘制成绩分布
+    group_group = df.groupby(['组号', '成绩']).size().unstack().fillna(0)
+    group_group.plot(kind='bar', stacked=True, figsize=(10, 7))
+    plt.title('不同组号的成绩分布')
+    plt.xlabel('组号')
+    plt.ylabel('学生数量')
+    plt.show()
+
+# 主函数
+if __name__ == '__main__':
+    # 文件名为 'students.csv'
+    filename = 'students.csv'
+    df = read_results(filename)
+    
+    # 绘制图表
+    plot_distributions(df)

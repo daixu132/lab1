@@ -1,0 +1,44 @@
+import matplotlib.pyplot as plt
+
+# 读取 .dat 文件的函数
+def read(file):
+    with open(file, 'r') as file:
+        lines = file.readlines()
+        # 第一行包含点的数量 (N)
+        N = int(lines[0].strip())
+        # 读取每一行的坐标点
+        data = [list(map(float, line.strip().split())) for line in lines[1:N+1]]
+    return data
+
+# 文件路径
+file1 = '你的001.dat文件路径'
+file2 = '你的002.dat文件路径'
+
+# 读取数据
+data_001 = read(file1)
+data_002 = read(file2)
+
+# 分离X和Y坐标
+x_001, y_001 = zip(*data_001)
+x_002, y_002 = zip(*data_002)
+
+# 创建图像窗口
+plt.figure(figsize=(10, 5))
+
+# 第一个文件 (001.dat) 的散点图
+plt.subplot(1, 2, 1)
+plt.scatter(x_001, y_001, color='blue')
+plt.title('Data from 001.dat')
+plt.xlabel('X')
+plt.ylabel('Y')
+
+# 第二个文件 (002.dat) 的散点图
+plt.subplot(1, 2, 2)
+plt.scatter(x_002, y_002, color='green')
+plt.title('Data from 002.dat')
+plt.xlabel('X')
+plt.ylabel('Y')
+
+# 调整布局并显示图像
+plt.tight_layout()
+plt.show()

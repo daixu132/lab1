@@ -1,0 +1,88 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+from matplotlib.animation import PillowWriter
+
+# 读取文件并解析数据
+def read_file(filename):
+    with open(filename, 'r') as file:
+        data = file.readlines()
+    # 将每一行转换为浮点数并返回二维列表
+    data = [list(map(float, line.split())) for line in data]
+    return data
+
+# 绘制每一帧并保存
+def plot_frames(data, output_dir, is_gif=False):
+    N = len(data) // 2  # 计算帧数（每两行是一帧）
+    
+    # 初始化全局的X和Y的最大最小值，以便统一坐标系
+    x_max, x_min, y_max, y_min = -np.inf, np.inf, -np.inf, np.inf
+    
+    # 先遍历所有帧，计算全局的坐标轴范围
+    for i in range(N):
+        x = data[2*i]    # 第i帧的x坐标
+        y = data[2*i+1]  # 第i帧的y坐标
+        x_max = max(x_max, max(x))
+        x_min = min(x_min, min(x))
+        y_max = max(y_max, max(y))
+        y_min = min(y_min, min(y))
+
+    # 如果输出目录不存在，则创建
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    # 如果要生成GIF，定义一个列表存储图像
+    if is_gif:
+        frames = []
+
+    # 开始绘制每一帧
+    for i in range(N):
+        x = data[2*i]    # 第i帧的x坐标
+        y = data[2*i+1]  # 第i帧的y坐标
+
+        # 创建一个图形
+        plt.figure(figsize=(6, 6))
+        plt.plot(x, y, 'o-', label=f'Frame {i+1}')  # 绘制点并连接成线
+        plt.xlim([x_min, x_max])  # 统一X轴范围
+        plt.ylim([y_min, y_max])  # 统一Y轴范围
+        plt.grid(True, which='both')  # 显示网格
+        plt.title(f'Frame {i+1}')  # 设置标题为帧数
+        plt.xlabel('X')  # X轴标签
+        plt.ylabel('Y')  # Y轴标签
+
+        # 保存当前帧为PNG图像
+        output_file = os.path.join(output_dir, f'frame_{i+1}.png')
+        plt.savefig(output_file)
+        plt.close()
+
+        # 如果生成GIF，将图片保存到列表中
+        if is_gif:
+            frames.append(plt.imread(output_file))
+
+    # 如果生成GIF，保存为动画
+    if is_gif:
+        fig, ax = plt.subplots(figsize=(6, 6))
+        ax.set_xlim([x_min, x_max])
+        ax.set_ylim([y_min, y_max])
+        ax.grid(True, which='both')
+
+        def update(frame):
+            ax.clear()
+            ax.plot(frame[0], frame[1], 'o-')
+            ax.set_title(f'Frame {i+1}')
+            ax.grid(True, which='both')
+
+        ani = PillowWriter(fps=2)  # 每秒2帧
+        ani.save(os.path.join(output_dir, 'animation.gif'))
+
+# 主函数，读取数据并绘制帧
+if __name__ == '__main__':
+    # 将文件名修改为 frames.dat
+    filename = 'frames.dat'
+    data = read_file(filename)
+    
+    # 定义输出目录
+    output_dir = 'frames_output'
+    
+    # 调用绘制函数，不生成GIF，只保存为PNG
+    plot_frames(data, output_dir, is_gif=False)
